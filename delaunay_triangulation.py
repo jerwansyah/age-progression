@@ -68,27 +68,36 @@ class DelaunayTriangulation:
 
         # Insert points into subdiv
         for p in points:
-            x, y = p
-            if x < 0:
-                x = 0
-            elif x > size[1]:
-                x = size[1]-1
-            if y < 0:
-                y = 0
-            elif y > size[0]:
-                y = size[0]-1
-            y = y if y > 0 else 0
-            p = (x, y)
             subdiv.insert(p)
         triangle_list = subdiv.getTriangleList().tolist()
         return triangle_list
 
-    def save_triangle_list(self, tris, filename):
+    def save_triangle_list(self, tris, rect, points, filename):
+        dtris = []
+        for t in tris:
+            pt = []
+            pt.append((t[0], t[1]))
+            pt.append((t[2], t[3]))
+            pt.append((t[4], t[5]))
+
+            pt1 = (t[0], t[1])
+            pt2 = (t[2], t[3])
+            pt3 = (t[4], t[5])
+
+            if self.rect_contains(rect, pt1) and self.rect_contains(rect, pt2) \
+                and self.rect_contains(rect, pt3):
+                ind = []
+                for j in range(0, 3):
+                    for k in range(0, len(points)):
+                        if(abs(pt[j][0] - points[k][0]) < 1.0 and abs(pt[j][1] - points[k][1]) < 1.0):
+                            ind.append(k)
+                if len(ind) == 3:
+                    dtris.append((ind[0], ind[1], ind[2]))
+
         with open("data/test/triangles_" + filename + ".txt", "w") as file:
         # with open("data/triangle_list/" + filename + ".txt", "w") as file:
-            for triangle in tris:
-                file.write('{:.0f} {:.0f} {:.0f} '.format(triangle[0], triangle[1], triangle[2]))
-                file.write('{:.0f} {:.0f} {:.0f}'.format(triangle[3], triangle[4], triangle[5]))
+            for el in dtris:
+                file.write('{:.0f} {:.0f} {:.0f}'.format(el[0], el[1], el[2]))
                 file.write("\n")
 
 
@@ -108,7 +117,7 @@ if __name__ == '__main__':
     points_color = (0, 0, 255)
 
     # Read in the image.
-    img = cv2.imread("data/test/img_03.jpg")
+    img = cv2.imread("data/test/img_02.jpg")
 
     # Keep a copy around
     img_orig = img.copy()
@@ -124,7 +133,7 @@ if __name__ == '__main__':
     points = []
 
     # Read in the points from a text file
-    with open("data/test/points_img_03.txt") as file:
+    with open("data/test/points_img_02.txt") as file:
         line = file.readline()
         coordinates = line.split(' ')
         # remove filename
@@ -148,9 +157,9 @@ if __name__ == '__main__':
             triangulation.draw_delaunay(img_copy, subdiv, (255, 255, 255))
             if DEBUG:
                 cv2.imshow(win_delaunay, img_copy)
-                cv2.waitKey(100)
+                cv2.waitKey(20)
 
-    triangulation.save_triangle_list(triangulation.get_triangle_list(img, points), 'img_03')
+    triangulation.save_triangle_list(triangulation.get_triangle_list(img, points), rect, points, 'img_02')
 
     # Draw delaunay triangles
     triangulation.draw_delaunay(img, subdiv, (255, 255, 255))

@@ -89,44 +89,76 @@ def morph_triangle(img1, img2, img, t1, t2, t, alpha, bulk=False):
     # Copy triangular region of the rectangular patch to the output image
     img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] * ( 1 - mask ) + img_rect * mask
 
-def bulk_morph(lower, upper, criteria, points, df):
+def bulk_morph(lower, upper, criteria, df):
     filename_output = str(lower) + '_' + str(upper) + '_' + str(criteria)
 
     files = df[0].tolist()
+    n_files = len(files) if len(files) > 0 else 1
+    alpha = 1 / n_files
+
+    print(alpha)
+
+    # Read images
+    # img1 = cv2.imread('./data/morphed_data/images/' + filename_data + '.txt')
+    img1 = cv2.imread('./data/UTKFace/' + filename + '.jpg')
+    img2 = cv2.imread('./data/test/' + 'img_02' + '.jpg')
 
     # Convert Mat to float data type
-    # img1 = np.float32(img1)
-    # img2 = np.float32(img2)
+    img1 = np.float32(img1)
+    img2 = np.float32(img2)
 
     # Read array of corresponding points
-    alpha = 1 / len(files)
-    points = read_points('data/morphed_data/points/' + filename_data + '.txt', oneline=False)
+    # points1 = read_points('data/morphed_data/points/' + filename_data + '.txt', oneline=False)
+    points1 = read_points('data/test/points_img_01.txt')[0]
+    points2 = read_points('data/test/points_img_02.txt')[0]
+    points = read_points('data/test/points/' + filename_output + '.txt', oneline=False)
+
+    # Compute weighted average point coordinates
+    for i in range(0, len(points1)):
+        points1x, points1y = points1[i]
+        points2x, points2y = points2[i]
+        x = int(round((1 - alpha) * float(points1x) + alpha * float(points2x)))
+        y = int(round((1 - alpha) * float(points1y) + alpha * float(points2y)))
+        points.append((x,y))
 
     # Allocate space for final output
     img_morph = np.zeros(img1.shape, dtype = img1.dtype)
+    rect = (0, 0, img_morph.shape[1], img_morph.shape[0])
 
     # Read triangles
-    tris1 = read_triangles()
-    with open("data/triangle_list/" + 'a' + ".txt") as file:
-        for line in file:
-            x1, y1, x2, y2, x3, y3 = line.strip().split(' ')
+    tris1 = read_triangles('data/test/triangles_img_01.txt')
+    tris2 = read_triangles('data/test/triangles_img_02.txt')
+    triangulation = DelaunayTriangulation()
+    tris = triangulation.get_triangle_list(img_morph, points)
+    triangulation.save_triangle_list(tris, rect, points, 'temp')
+    tris = read_triangles('data/test/triangles_temp.txt')
 
-            t1 = [(x1, y1), (x2, y2), (x3, y3)]
-            t2 = [points2[x], points2[y], points2[z]]
-            t = [points[x], points[y], points[z]]
+    for i in tris:
+        x, y, z = i
 
-            # Morph one triangle at a time.
-            morph_triangle(img1, img2, img_morph, t1, t2, t, alpha)
+        x = int(x)
+        y = int(y)
+        z = int(z)
 
+        t1 = [points1[x], points1[y], points1[z]]
+        t2 = [points2[x], points2[y], points2[z]]
+        t = [points[x],  points[y],  points[z]]
+
+        # Morph one triangle at a time.
+        morph_triangle(img1, img2, img_morph, t1, t2, t, alpha)
+
+    # Display Result
+    # cv2.imshow("Morphed Face", np.uint8(img_morph))
+    # cv2.waitKey(1)
     # save image
-    cv2.imwrite('./data/morphed_data/morphed_' + filename_output + '.jpg', np.uint8(imgMorph))
+    cv2.imwrite('./data/morphed_data/morphed_' + filename_output + '.jpg', np.uint8(img_morph))
 
 def read_triangles(path):
     triangles = []
     with open(path) as file:
         for line in file:
-            x1, y1, x2, y2, x3, y3 = line.strip().split(' ')
-            triangles.append([(int(x1), int(y1)), (int(x2), int(y2)), (int(x3), int(y3))])
+            a, b, c = line.strip().split(' ')
+            triangles.append((int(a), int(b), int(c)))
     return triangles
 
 
@@ -137,7 +169,7 @@ if __name__ == '__main__':
     # Read images
     # img1 = cv2.imread('./data/morphed_data/images/' + filename_data + '.txt')
     img1 = cv2.imread('./data/test/' + 'img_01' + '.jpg')
-    img2 = cv2.imread('./data/test/' + 'img_03' + '.jpg')
+    img2 = cv2.imread('./data/test/' + 'img_02' + '.jpg')
 
     # Convert Mat to float data type
     img1 = np.float32(img1)
@@ -147,7 +179,7 @@ if __name__ == '__main__':
     alpha = 0.5
     # points1 = read_points('data/morphed_data/points/' + filename_data + '.txt', oneline=False)
     points1 = read_points('data/test/points_img_01.txt')[0]
-    points2 = read_points('data/test/points_img_03.txt')[0]
+    points2 = read_points('data/test/points_img_02.txt')[0]
     points = []
 
     # Compute weighted average point coordinates
@@ -159,25 +191,31 @@ if __name__ == '__main__':
         points.append((x,y))
 
     # Allocate space for final output
-    imgMorph = np.zeros(img1.shape, dtype = img1.dtype)
+    img_morph = np.zeros(img1.shape, dtype = img1.dtype)
+    rect = (0, 0, img_morph.shape[1], img_morph.shape[0])
 
     # Read triangles
     tris1 = read_triangles('data/test/triangles_img_01.txt')
-    tris2 = read_triangles('data/test/triangles_img_03.txt')
+    tris2 = read_triangles('data/test/triangles_img_02.txt')
     triangulation = DelaunayTriangulation()
-    tris = triangulation.get_triangle_list(imgMorph, points)
-    triangulation.save_triangle_list(tris, 'temp')
+    tris = triangulation.get_triangle_list(img_morph, points)
+    triangulation.save_triangle_list(tris, rect, points, 'temp')
     tris = read_triangles('data/test/triangles_temp.txt')
 
-    for i in range(0, len(tris1)):
-        t1 = tris1[i]
-        t2 = tris2[i]
-        t = tris[i]
+    for i in tris:
+        x, y, z = i
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
+        t1 = [points1[x], points1[y], points1[z]]
+        t2 = [points2[x], points2[y], points2[z]]
+        t = [points[x],  points[y],  points[z]]
+
         # Morph one triangle at a time.
-        morph_triangle(img1, img2, imgMorph, t1, t2, t, alpha)
-        cv2.imshow("Morphed Face", np.uint8(imgMorph))
-        cv2.waitKey(10)
+        morph_triangle(img1, img2, img_morph, t1, t2, t, alpha)
 
     # Display Result
-    cv2.imshow("Morphed Face", np.uint8(imgMorph))
+    cv2.imshow("Morphed Face", np.uint8(img_morph))
     cv2.waitKey(0)

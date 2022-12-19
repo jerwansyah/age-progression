@@ -28,10 +28,9 @@ if __name__ == '__main__':
     DEBUG = False
 
     detector = FeatureDetection('shape_predictor_68_face_landmarks.dat', 'mmod_human_face_detector.dat')
-    image = cv2.imread('data/test/img_03.jpg')
-    # image = cv2.imread('data/UTKFace/12_1_0_20170109204113685.jpg.chip.jpg')
+    image = cv2.imread('data/test/img_05.jpg')
     shape = detector.detect(image)
-    detector.save_points(shape, 'data/test/points_img_03.txt', 'img_03')
+    detector.save_points(shape, 'data/test/points_img_05.txt', 'img_05')
 
     for i in range(0, 68):
         x = shape.part(i).x
