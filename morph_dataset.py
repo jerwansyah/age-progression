@@ -1,7 +1,9 @@
 import pandas
 import re
 import cv2
+import glob
 from delaunay_triangulation import DelaunayTriangulation
+import morphing
 
 
 def save_list(triangulation, df):
@@ -22,48 +24,186 @@ def save_list(triangulation, df):
         except:
             pass
 
+def get_data_num(df, string):
+    return df.loc[(df[0].str.startswith(string))].shape[0]
+
+# def count_data(df):
+#     temp_m_0 = 0
+#     temp_m_1 = 0
+#     temp_m_2 = 0
+#     temp_m_3 = 0
+#     temp_m_4 = 0
+#     temp_f_0 = 0
+#     temp_f_1 = 0
+#     temp_f_2 = 0
+#     temp_f_3 = 0
+#     temp_f_4 = 0
+#     for i in range (0, 1+1):
+#         temp_m_0 += get_data_num(df, str(i) + '_0_0')
+#         temp_m_1 += get_data_num(df, str(i) + '_0_1')
+#         temp_m_2 += get_data_num(df, str(i) + '_0_2')
+#         temp_m_3 += get_data_num(df, str(i) + '_0_3')
+#         temp_m_4 += get_data_num(df, str(i) + '_0_4')
+#         temp_f_0 += get_data_num(df, str(i) + '_1_0')
+#         temp_f_1 += get_data_num(df, str(i) + '_1_1')
+#         temp_f_2 += get_data_num(df, str(i) + '_1_2')
+#         temp_f_3 += get_data_num(df, str(i) + '_1_3')
+#         temp_f_4 += get_data_num(df, str(i) + '_1_4')
+#     temp_m_0 = 1 / temp_m_0 if temp_m_0 != 0 else 0
+#     temp_m_1 = 1 / temp_m_1 if temp_m_1 != 0 else 0
+#     temp_m_2 = 1 / temp_m_2 if temp_m_2 != 0 else 0
+#     temp_m_3 = 1 / temp_m_3 if temp_m_3 != 0 else 0
+#     temp_m_4 = 1 / temp_m_4 if temp_m_4 != 0 else 0
+#     temp_f_0 = 1 / temp_f_0 if temp_f_0 != 0 else 0
+#     temp_f_1 = 1 / temp_f_1 if temp_f_1 != 0 else 0
+#     temp_f_2 = 1 / temp_f_2 if temp_f_2 != 0 else 0
+#     temp_f_3 = 1 / temp_f_3 if temp_f_3 != 0 else 0
+#     temp_f_4 = 1 / temp_f_4 if temp_f_4 != 0 else 0
+#     return (temp_m_0, temp_m_1, temp_m_2, temp_m_3, temp_m_4, temp_f_0, temp_f_1, temp_f_2, temp_f_3, temp_f_4)
+
+def weight_points(string):
+    points = []
+    temp = []
+    pts = data.loc[(data[0].str.startswith(string))]
+    if pts.shape[0] == 0:
+        return None
+
+    for i in range(1, 137):
+        temp.append(pts.iloc[:, i].mean())
+
+    for i in range(0, len(temp), 2):
+        points.append((round(temp[i]), round(temp[i+1])))
+
+    return points
+
+def helper(lower, upper, string):
+    lower = str(lower)
+    temp = weight_points(lower + string)
+    k = 0
+    for i in range (int(lower)+1, int(upper)+1):
+        i = str(i)
+        try:
+            k += 1
+            temp += weight_points(i + string)
+        except:
+            continue
+    temp = pandas.DataFrame(temp).apply(lambda x: round (x / k))
+    return temp
+
+def get_weighted_points(lower, upper):
+    lower = str(lower)
+    upper = str(upper)
+
+    temp_m_0 = helper(lower, upper, '_0_0')
+    temp_m_1 = helper(lower, upper, '_0_1')
+    temp_m_2 = helper(lower, upper, '_0_2')
+    temp_m_3 = helper(lower, upper, '_0_3')
+    temp_m_4 = helper(lower, upper, '_0_4')
+    temp_f_0 = helper(lower, upper, '_1_0')
+    temp_f_1 = helper(lower, upper, '_1_1')
+    temp_f_2 = helper(lower, upper, '_1_2')
+    temp_f_3 = helper(lower, upper, '_1_3')
+    temp_f_4 = helper(lower, upper, '_1_4')
+
+    return (temp_m_0, temp_m_1, temp_m_2, temp_m_3, temp_m_4, temp_f_0, temp_f_1, temp_f_2, temp_f_3, temp_f_4)
+
+def save_point(df_points, lower, upper):
+    lower = str(lower)
+    upper = str(upper)
+    temp_m_0, temp_m_1, temp_m_2, temp_m_3, temp_m_4, temp_f_0, temp_f_1, temp_f_2, temp_f_3, temp_f_4 = df_points
+    try:
+        temp_m_1.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_0_1.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+    try:
+        temp_m_2.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_0_2.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+    try:
+        temp_m_3.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_0_3.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+    try:
+        temp_m_4.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_0_4.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+    try:
+        temp_f_0.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_1_0.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+    try:
+        temp_f_1.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_1_1.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+    try:
+        temp_f_2.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_1_2.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+    try:
+        temp_f_3.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_1_3.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+    try:
+        temp_f_4.to_csv('data/morphed_data/points/' + lower + '_' + upper + '_1_4.txt', sep=' ', header=None, index=None)
+    except:
+        pass
+
 
 if __name__ == '__main__':
-    # read data
+    # create triangle list
+    # # read data
     data = pandas.read_csv('data/landmark_list/landmark_list.txt', sep=' ', header=None)
 
     data[0] = data[0].apply(lambda x: re.sub(r'.jpg', '', x))
-    data['age'] = data[0].apply(lambda x: int(x.split('_')[0]))
-    data['gender'] = data[0].apply(lambda x: x.split('_')[1])
-    data['race'] = data[0].apply(lambda x: x.split('_')[2])
+    # data['age'] = data[0].apply(lambda x: int(x.split('_')[0]))
+    # data['gender'] = data[0].apply(lambda x: x.split('_')[1])
+    # data['race'] = data[0].apply(lambda x: x.split('_')[2])
 
-    # get triangles lists
-    triangulation = DelaunayTriangulation()
-    save_list(triangulation, data)
+    # # get triangles lists
+    # triangulation = DelaunayTriangulation()
+    # save_list(triangulation, data)
 
-    age_groups = [0, 2, 4, 7, 10, 13, 16, 20, 25, 35, 46, 57, 68, 116]
-    age_groups_labels = [0, 2, 4, 7, 10, 13, 16, 20, 25, 35, 46, 57, 68]
+    # splitting data
     gender = {0: 'male', 1: 'female'}
     race = {0: 'white', 1: 'black', 2: 'asian', 3: 'indian', 4: 'others'}
 
-    # split data into age groups
-    data['age_group'] = pandas.cut(data['age'], bins=age_groups, labels=age_groups_labels, right=False)
+    filepaths = glob.glob("./data/triangle_list/*.txt")
+    filenames = []
+    for filepath in filepaths:
+        filenames.append(filepath.split('\\')[1].split('.')[0])
 
-    data_0 = data[data['age_group'] == 0].sort_values(by=['gender'])
-    data_2 = data[data['age_group'] == 2].sort_values(by=['gender'])
-    data_4 = data[data['age_group'] == 4].sort_values(by=['gender'])
-    data_7 = data[data['age_group'] == 7].sort_values(by=['gender'])
-    data_10 = data[data['age_group'] == 10].sort_values(by=['gender'])
-    data_13 = data[data['age_group'] == 13].sort_values(by=['gender'])
-    data_16 = data[data['age_group'] == 16].sort_values(by=['gender'])
-    data_20 = data[data['age_group'] == 20].sort_values(by=['gender'])
-    data_25 = data[data['age_group'] == 25].sort_values(by=['gender'])
-    data_35 = data[data['age_group'] == 35].sort_values(by=['gender'])
-    data_46 = data[data['age_group'] == 46].sort_values(by=['gender'])
-    data_57 = data[data['age_group'] == 57].sort_values(by=['gender'])
-    data_68 = data[data['age_group'] == 68].sort_values(by=['gender'])
+    files = pandas.DataFrame(data=filenames)
+    files['age'] = files[0].apply(lambda x: int(x.split('_')[0]))
+    files['gender'] = files[0].apply(lambda x: x.split('_')[1])
+    files['race'] = files[0].apply(lambda x: x.split('_')[2])
 
-    # # split data into gender groups
-    # data_0_0 = data_0[data_0['gender'] == '0']
-    # data_0_1 = data_0[data_0['gender'] == '1']
+    # split data into groups
+    data_0_1 = files.loc[(files['age'] < 2)].sort_values(by=['gender'])
+    data_2_3 = files.loc[(files['age'] >= 2) | (files['age'] <= 3)].sort_values(by=['gender'])
+    data_7_9 = files.loc[(files['age'] >= 7) | (files['age'] <= 9)].sort_values(by=['gender'])
+    data_13_15 = files.loc[(files['age'] >= 13) | (files['age'] <= 15)].sort_values(by=['gender'])
+    data_25_34 = files.loc[(files['age'] >= 25) | (files['age'] <= 34)].sort_values(by=['gender'])
+    data_35_46 = files.loc[(files['age'] >= 35) | (files['age'] <= 46)].sort_values(by=['gender'])
+    data_68_80 = files.loc[(files['age'] >= 68) | (files['age'] <= 116)].sort_values(by=['gender'])
 
-    # split data into race groups
+    # morphing data
+    # alpha_0_1_m_0, alpha_0_1_m_1, alpha_0_1_m_2, alpha_0_1_m_3, alpha_0_1_m_4, alpha_0_1_f_0, alpha_0_1_f_1, alpha_0_1_f_2, alpha_0_1_f_3, alpha_0_1_f_4 = count_data(data_0_1)
+    # alpha_2_3_m_0, alpha_2_3_m_1, alpha_2_3_m_2, alpha_2_3_m_3, alpha_2_3_m_4, alpha_2_3_f_0, alpha_2_3_f_1, alpha_2_3_f_2, alpha_2_3_f_3, alpha_2_3_f_4 = count_data(data_2_3)
+    # alpha_7_9_m_0, alpha_7_9_m_1, alpha_7_9_m_2, alpha_7_9_m_3, alpha_7_9_m_4, alpha_7_9_f_0, alpha_7_9_f_1, alpha_7_9_f_2, alpha_7_9_f_3, alpha_7_9_f_4 = count_data(data_7_9)
+    # alpha_13_15_m_0, alpha_13_15_m_1, alpha_13_15_m_2, alpha_13_15_m_3, alpha_13_15_m_4, alpha_13_15_f_0, alpha_13_15_f_1, alpha_13_15_f_2, alpha_13_15_f_3, alpha_13_15_f_4 = count_data(data_13_15)
+    # alpha_25_34_m_0, alpha_25_34_m_1, alpha_25_34_m_2, alpha_25_34_m_3, alpha_25_34_m_4, alpha_25_34_f_0, alpha_25_34_f_1, alpha_25_34_f_2, alpha_25_34_f_3, alpha_25_34_f_4 = count_data(data_25_34)
+    # alpha_35_46_m_0, alpha_35_46_m_1, alpha_35_46_m_2, alpha_35_46_m_3, alpha_35_46_m_4, alpha_35_46_f_0, alpha_35_46_f_1, alpha_35_46_f_2, alpha_35_46_f_3, alpha_35_46_f_4 = count_data(data_35_46)
+    # alpha_68_80_m_0, alpha_68_80_m_1, alpha_68_80_m_2, alpha_68_80_m_3, alpha_68_80_m_4, alpha_68_80_f_0, alpha_68_80_f_1, alpha_68_80_f_2, alpha_68_80_f_3, alpha_68_80_f_4 = count_data(data_68_80)
 
+    # filter data with files
+    data = data.loc[data[0].isin(files[0])]
+    save_point(get_weighted_points(1, 1), 1, 1)
+    save_point(get_weighted_points(2, 3), 2, 3)
+    save_point(get_weighted_points(7, 9), 7, 9)
+    save_point(get_weighted_points(13, 15), 13, 15)
+    save_point(get_weighted_points(25, 34), 25, 34)
+    save_point(get_weighted_points(35, 46), 35, 46)
+    save_point(get_weighted_points(68, 80), 68, 80)
 
     # image = cv2.imread('data/UTKFace/12_1_0_20170109204805155.jpg.chip.jpg')
     # # image = cv2.imread('data/UTKFace/12_1_0_20170109204113685.jpg.chip.jpg')
