@@ -6,4 +6,5 @@ data/triangle_list
 !/data/landmark_list/landmark_list.txt
 !/data/landmark_list/landmark_list_groups.txt
 !/data/morphed_data/**/*
+!/data/test/**/*
 __pycache__

@@ -84,7 +84,7 @@ class DelaunayTriangulation:
         return triangle_list
 
     def save_triangle_list(self, tris, filename):
-        with open("data/triangle_list/" + filename + ".txt", "w") as file:
+        with open("data/test/triangles_" + filename + ".txt", "w") as file:
             for triangle in tris:
                 for points in triangle:
                     file.write('{:.0f}'.format(points))
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     points_color = (0, 0, 255)
 
     # Read in the image.
-    img = cv2.imread("data/UTKFace/12_1_0_20170109204805155.jpg.chip.jpg")
+    img = cv2.imread("data/img_01.jpg")
 
     # Keep a copy around
     img_orig = img.copy()
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     points = []
 
     # Read in the points from a text file
-    with open("data/points.txt") as file:
+    with open("data/test/feats_img_01.txt") as file:
         line = file.readline()
         coordinates = line.split(' ')
         # remove filename
@@ -151,7 +151,7 @@ if __name__ == '__main__':
                 cv2.waitKey(100)
 
         # triangle_list = subdiv.getTriangleList()
-    triangulation.save_triangle_list(triangulation.get_triangle_list(img, points), '12_1_0_20170109204805155')
+    triangulation.save_triangle_list(triangulation.get_triangle_list(img, points), 'img_01')
 
     # Draw delaunay triangles
     triangulation.draw_delaunay(img, subdiv, (255, 255, 255))
