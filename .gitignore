@@ -1,1 +1,4 @@
-data/
+data/UTKFace
+data/**/*.txt
+data/*.dat
+!/data/landmark_list/landmark_list.txt
