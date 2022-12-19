@@ -148,6 +148,15 @@ def save_point(df_points, lower, upper):
     except:
         pass
 
+    def read_points(path):
+        points = []
+        with open(path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                line = line.split(' ')
+                points.append((int(line[0]), int(line[1])))
+        return points
+
 
 if __name__ == '__main__':
     # create triangle list
@@ -155,13 +164,13 @@ if __name__ == '__main__':
     data = pandas.read_csv('data/landmark_list/landmark_list.txt', sep=' ', header=None)
 
     data[0] = data[0].apply(lambda x: re.sub(r'.jpg', '', x))
-    # data['age'] = data[0].apply(lambda x: int(x.split('_')[0]))
-    # data['gender'] = data[0].apply(lambda x: x.split('_')[1])
-    # data['race'] = data[0].apply(lambda x: x.split('_')[2])
+    data['age'] = data[0].apply(lambda x: int(x.split('_')[0]))
+    data['gender'] = data[0].apply(lambda x: x.split('_')[1])
+    data['race'] = data[0].apply(lambda x: x.split('_')[2])
 
     # # get triangles lists
-    # triangulation = DelaunayTriangulation()
-    # save_list(triangulation, data)
+    triangulation = DelaunayTriangulation()
+    save_list(triangulation, data)
 
     # splitting data
     gender = {0: 'male', 1: 'female'}
@@ -187,14 +196,6 @@ if __name__ == '__main__':
     data_68_80 = files.loc[(files['age'] >= 68) | (files['age'] <= 116)].sort_values(by=['gender'])
 
     # morphing data
-    # alpha_0_1_m_0, alpha_0_1_m_1, alpha_0_1_m_2, alpha_0_1_m_3, alpha_0_1_m_4, alpha_0_1_f_0, alpha_0_1_f_1, alpha_0_1_f_2, alpha_0_1_f_3, alpha_0_1_f_4 = count_data(data_0_1)
-    # alpha_2_3_m_0, alpha_2_3_m_1, alpha_2_3_m_2, alpha_2_3_m_3, alpha_2_3_m_4, alpha_2_3_f_0, alpha_2_3_f_1, alpha_2_3_f_2, alpha_2_3_f_3, alpha_2_3_f_4 = count_data(data_2_3)
-    # alpha_7_9_m_0, alpha_7_9_m_1, alpha_7_9_m_2, alpha_7_9_m_3, alpha_7_9_m_4, alpha_7_9_f_0, alpha_7_9_f_1, alpha_7_9_f_2, alpha_7_9_f_3, alpha_7_9_f_4 = count_data(data_7_9)
-    # alpha_13_15_m_0, alpha_13_15_m_1, alpha_13_15_m_2, alpha_13_15_m_3, alpha_13_15_m_4, alpha_13_15_f_0, alpha_13_15_f_1, alpha_13_15_f_2, alpha_13_15_f_3, alpha_13_15_f_4 = count_data(data_13_15)
-    # alpha_25_34_m_0, alpha_25_34_m_1, alpha_25_34_m_2, alpha_25_34_m_3, alpha_25_34_m_4, alpha_25_34_f_0, alpha_25_34_f_1, alpha_25_34_f_2, alpha_25_34_f_3, alpha_25_34_f_4 = count_data(data_25_34)
-    # alpha_35_46_m_0, alpha_35_46_m_1, alpha_35_46_m_2, alpha_35_46_m_3, alpha_35_46_m_4, alpha_35_46_f_0, alpha_35_46_f_1, alpha_35_46_f_2, alpha_35_46_f_3, alpha_35_46_f_4 = count_data(data_35_46)
-    # alpha_68_80_m_0, alpha_68_80_m_1, alpha_68_80_m_2, alpha_68_80_m_3, alpha_68_80_m_4, alpha_68_80_f_0, alpha_68_80_f_1, alpha_68_80_f_2, alpha_68_80_f_3, alpha_68_80_f_4 = count_data(data_68_80)
-
     # filter data with files
     data = data.loc[data[0].isin(files[0])]
     save_point(get_weighted_points(1, 1), 1, 1)
@@ -204,6 +205,10 @@ if __name__ == '__main__':
     save_point(get_weighted_points(25, 34), 25, 34)
     save_point(get_weighted_points(35, 46), 35, 46)
     save_point(get_weighted_points(68, 80), 68, 80)
+
+    points = read_points('data/morphed_data/points/1_1_0_0.txt')
+
+    bulk_morph(1, 1, '0_0', points, data_0_1)
 
     # image = cv2.imread('data/UTKFace/12_1_0_20170109204805155.jpg.chip.jpg')
     # # image = cv2.imread('data/UTKFace/12_1_0_20170109204113685.jpg.chip.jpg')
