@@ -37,4 +37,6 @@ Label: [age]\_[gender]\_[race]\_[date&time].jpg
 
 ## References
 
+- https://learnopencv.com/face-morph-using-opencv-cpp-python/
+- https://learnopencv.com/delaunay-triangulation-and-voronoi-diagram-using-opencv-c-python/
 - https://susanqq.github.io/UTKFace/
