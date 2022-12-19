@@ -24,13 +24,10 @@ import pandas
 # read the data from the file
 data = pandas.read_csv('data/landmark_list/landmark_list.txt', sep=' ', header=None)
 
-age_groups = [0, 2, 4, 7, 10, 13, 16, 20, 25, 35, 46, 57, 68]
-
 data['age'] = data[0].apply(lambda x: int(x.split('_')[0]))
 data['gender'] = data[0].apply(lambda x: x.split('_')[1])
 # data['gender'] = data['gender'].apply(lambda x: int(x))
 data['race'] = data[0].apply(lambda x: x.split('_')[2])
 # data['race'] = data['race'].apply(lambda x: int(x))
-# data['age_group'] = data['age'].apply(lambda x: )
 
 print(data.head())

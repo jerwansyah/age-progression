@@ -25,8 +25,11 @@ class FeatureDetection:
 
 
 if __name__ == '__main__':
+    DEBUG = False
+
     detector = FeatureDetection('shape_predictor_68_face_landmarks.dat', 'mmod_human_face_detector.dat')
     image = cv2.imread('data/UTKFace/12_1_0_20170109204805155.jpg.chip.jpg')
+    # image = cv2.imread('data/UTKFace/12_1_0_20170109204113685.jpg.chip.jpg')
     shape = detector.detect(image)
     detector.save_points(shape, 'data/points.txt', '12_1_0_20170109204805155')
 
@@ -35,6 +38,7 @@ if __name__ == '__main__':
         y = shape.part(i).y
         cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 
-    cv2.imshow('image', image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    if DEBUG:
+        cv2.imshow('image', image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()

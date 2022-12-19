@@ -24,11 +24,11 @@ class DelaunayTriangulation:
 
     # Draw delaunay triangles
     def draw_delaunay(self, img, subdiv, delaunay_color):
-        triangleList = subdiv.getTriangleList()
+        triangle_list = subdiv.getTriangleList()
         size = img.shape
         r = (0, 0, size[1], size[0])
 
-        for t in triangleList:
+        for t in triangle_list:
             pt1 = (int(t[0]), int(t[1]))
             pt2 = (int(t[2]), int(t[3]))
             pt3 = (int(t[4]), int(t[5]))
@@ -58,16 +58,50 @@ class DelaunayTriangulation:
             cv2.circle(img, (int(centers[i][0]), int(centers[i][1])), 3,\
                        (0, 0, 0), cv2.FILLED, cv2.LINE_AA, 0)
 
+    def get_triangle_list(self, img, points):
+        # Rectangle to be used with Subdiv2D
+        size = img.shape
+        rect = (0, 0, size[1], size[0])
+
+        # Create an instance of Subdiv2D
+        subdiv = cv2.Subdiv2D(rect)
+
+        # Insert points into subdiv
+        for p in points:
+            x, y = p
+            if x < 0:
+                x = 0
+            elif x > size[1]:
+                x = size[1]-1
+            if y < 0:
+                y = 0
+            elif y > size[0]:
+                y = size[0]-1
+            y = y if y > 0 else 0
+            p = (x, y)
+            subdiv.insert(p)
+        triangle_list = subdiv.getTriangleList().tolist()
+        return triangle_list
+
+    def save_triangle_list(self, tris, filename):
+        with open("data/triangle_list/" + filename + ".txt", "w") as file:
+            for triangle in tris:
+                for points in triangle:
+                    file.write('{:.0f}'.format(points))
+                    file.write(" ")
+                file.write("\n")
+
 
 if __name__ == '__main__':
+    # Turn on animation while drawing triangles
+    animate = False
+    DEBUG = False
+
     # Define window names
     win_delaunay = "Delaunay Triangulation"
     win_voronoi = "Voronoi Diagram"
 
     triangulation = DelaunayTriangulation()
-
-    # Turn on animation while drawing triangles
-    animate = False
 
     # Define colors for drawing.
     delaunay_color = (255, 255, 255)
@@ -103,6 +137,7 @@ if __name__ == '__main__':
     # print(points)
 
     # Insert points into subdiv
+    triangle_list = []
     for p in points:
         subdiv.insert(p)
 
@@ -111,8 +146,12 @@ if __name__ == '__main__':
             img_copy = img_orig.copy()
             # Draw delaunay triangles
             triangulation.draw_delaunay(img_copy, subdiv, (255, 255, 255))
-            cv2.imshow(win_delaunay, img_copy)
-            cv2.waitKey(100)
+            if DEBUG:
+                cv2.imshow(win_delaunay, img_copy)
+                cv2.waitKey(100)
+
+        # triangle_list = subdiv.getTriangleList()
+    triangulation.save_triangle_list(triangulation.get_triangle_list(img, points), '12_1_0_20170109204805155')
 
     # Draw delaunay triangles
     triangulation.draw_delaunay(img, subdiv, (255, 255, 255))
@@ -128,6 +167,7 @@ if __name__ == '__main__':
     triangulation.draw_voronoi(img_voronoi,subdiv)
 
     # Show results
-    cv2.imshow(win_delaunay,img)
-    cv2.imshow(win_voronoi,img_voronoi)
-    cv2.waitKey(0)
+    if DEBUG:
+        cv2.imshow(win_delaunay,img)
+        cv2.imshow(win_voronoi,img_voronoi)
+        cv2.waitKey(0)
