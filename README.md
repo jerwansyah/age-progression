@@ -7,6 +7,11 @@
 - Numpy
 - Pandas
 
+## Examples
+
+![morphing with 0.5 alpha](./data/alpha%20half.png)
+![morphing with 0.2 alpha](./data/alpha%202-8.png)
+
 ## How to run
 
 1. Run the following commands
@@ -21,6 +26,8 @@ tar -xvzf .\data\shape_predictor_68_face_landmarks.dat.bz2 -C .\data\shape_predi
 
 - Download UTKFace.tar.gz from this [link](https://drive.google.com/drive/folders/0BxYys69jI14kU0I1YUQyY1ZDRUE?usp=sharing) and move the extracted folder to data (final path: `data/UTKFace`)
 - Download landmark lists from this [link](https://drive.google.com/open?id=0BxYys69jI14kS1lmbW1jbkFHaW8) and move the txt files to data/landmark_list.
+
+3. Check for file name errors
 
 ## Filename guide
 
