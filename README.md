@@ -33,7 +33,7 @@ Label: [age]\_[gender]\_[race]\_[date&time].jpg
 
 ## Troubleshooting
 
-- In landmark_list_part3.txt line 123, there should not be a space before .jpg
+- File names should be checked and matched with landmark_list.txt
 
 ## References
 

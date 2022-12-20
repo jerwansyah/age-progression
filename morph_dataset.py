@@ -9,7 +9,7 @@ import morphing
 def save_list(triangulation, df):
     for i in range(len(df.index)):
         filename = df.iloc[i, 0]
-        img = cv2.imread("data/UTKFace/" + filename + ".jpg.chip.jpg")
+        img = cv2.imread("./data\\UTKFace\\" + filename + ".jpg.chip.jpg")
         pts = df.values[i, 1:-3].tolist()
 
         points = []
@@ -21,10 +21,11 @@ def save_list(triangulation, df):
         try:
             rect = (0, 0, img.shape[1], img.shape[0])
             tris = triangulation.get_triangle_list(img, points)
-            print(filename)
+            # print(filename)
             triangulation.save_triangle_list(tris, rect, points, filename)
         except:
-            pass
+            print("Error ", filename)
+            # pass
 
 def weight_points(string):
     points = []
@@ -147,8 +148,10 @@ if __name__ == '__main__':
     data['race'] = data[0].apply(lambda x: x.split('_')[2])
 
     # # get triangles lists
+    # print("Get triangle lists...")
     # triangulation = DelaunayTriangulation()
     # save_list(triangulation, data)
+    # print()
 
     # splitting data
     gender = {0: 'male', 1: 'female'}
@@ -175,18 +178,32 @@ if __name__ == '__main__':
     data_35_46 = data.loc[(data['age'] >= 35) | (data['age'] <= 46)].sort_values(by=['gender'])
     data_68_80 = data.loc[(data['age'] >= 68) | (data['age'] <= 116)].sort_values(by=['gender'])
 
-    # morphing data
-    save_point(get_weighted_points(1, 1), 1, 1)
-    save_point(get_weighted_points(2, 3), 2, 3)
-    save_point(get_weighted_points(7, 9), 7, 9)
-    save_point(get_weighted_points(13, 15), 13, 15)
-    save_point(get_weighted_points(25, 34), 25, 34)
-    save_point(get_weighted_points(35, 46), 35, 46)
-    save_point(get_weighted_points(68, 80), 68, 80)
+    # # morphing data
+    # print("Get morphed points...")
+    # save_point(get_weighted_points(1, 1), 1, 1)
+    # save_point(get_weighted_points(2, 3), 2, 3)
+    # save_point(get_weighted_points(7, 9), 7, 9)
+    # save_point(get_weighted_points(13, 15), 13, 15)
+    # save_point(get_weighted_points(25, 34), 25, 34)
+    # save_point(get_weighted_points(35, 46), 35, 46)
+    # save_point(get_weighted_points(68, 80), 68, 80)
+    # print()
 
-    morphing.bulk_morph(1, 1, '0_0', data_0_1)
+    def morph(df, lower, upper):
+        for i in range(0, 5):
+            data_m = df.loc[(df['gender'] == '0') & (df['race'] == str(i))]
+            data_f = df.loc[(df['gender'] == '1') & (df['race'] == str(i))]
+            print(lower, upper, i)
+            print(data_m.shape)
+            morphing.bulk_morph(lower, upper, ('0_' + str(i)), data_m)
+            morphing.bulk_morph(lower, upper, ('1_' + str(i)), data_f)
 
-    # image = cv2.imread('data/UTKFace/12_1_0_20170109204805155.jpg.chip.jpg')
-    # # image = cv2.imread('data/UTKFace/12_1_0_20170109204113685.jpg.chip.jpg')
-    # shape = detector.detect(image)
-    # detector.save_points(shape, 'data/points.txt', '12_1_0_20170109204805155')
+    print("Morphing data...")
+    morph(data_0_1, 1, 1)
+    morph(data_2_3, 2, 3)
+    morph(data_7_9, 7, 9)
+    morph(data_13_15, 13, 15)
+    morph(data_25_34, 25, 34)
+    morph(data_35_46, 35, 46)
+    morph(data_68_80, 68, 80)
+    print("Done")

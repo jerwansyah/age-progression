@@ -4,7 +4,6 @@ data/*.dat
 data/triangle_list
 !/data/img_01.jpg
 !/data/landmark_list/landmark_list.txt
-!/data/landmark_list/landmark_list_groups.txt
 !/data/morphed_data/**/*
 !/data/test/**/*
 /data/test/triangles_temp.txt

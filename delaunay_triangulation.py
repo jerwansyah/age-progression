@@ -68,7 +68,12 @@ class DelaunayTriangulation:
 
         # Insert points into subdiv
         for p in points:
-            subdiv.insert(p)
+            x, y = p
+            if x < 0: x = 0
+            elif x >= size[1]: x = size[1]-1
+            if y < 0: y = 0
+            elif y >= size[0]: y = size[0]-1
+            subdiv.insert((x, y))
         triangle_list = subdiv.getTriangleList().tolist()
         return triangle_list
 
