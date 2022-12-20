@@ -176,13 +176,13 @@ def read_triangles(path):
 
 
 if __name__ == '__main__':
-    filename_data = '1_1_0_0'
+    filename_data = '7_9_1_0'
     filename_input = 'img_01'
 
     # Read images
-    # img1 = cv2.imread('./data/morphed_data/images/' + filename_data + '.txt')
-    img1 = cv2.imread('./data/test/' + 'img_01' + '.jpg')
-    img2 = cv2.imread('./data/test/' + 'img_02' + '.jpg')
+    img1 = cv2.imread('./data/morphed_data/images/morphed_' + filename_data + '.jpg')
+    img2 = cv2.imread('./data/test/' + 'img_01' + '.jpg')
+    # img2 = cv2.imread('./data/test/' + 'img_02' + '.jpg')
 
     # Convert Mat to float data type
     img1 = np.float32(img1)
@@ -190,9 +190,9 @@ if __name__ == '__main__':
 
     # Read array of corresponding points
     alpha = 0.5
-    # points1 = read_points('data/morphed_data/points/' + filename_data + '.txt', oneline=False)
-    points1 = read_points('data/test/points_img_01.txt')[0]
-    points2 = read_points('data/test/points_img_02.txt')[0]
+    points1 = read_points('data/morphed_data/points/' + filename_data + '.txt', oneline=False)
+    points2 = read_points('data/test/points_img_01.txt')[0]
+    # points2 = read_points('data/test/points_img_02.txt')[0]
     points = []
 
     # Compute weighted average point coordinates
@@ -208,8 +208,8 @@ if __name__ == '__main__':
     rect = (0, 0, img_morph.shape[1], img_morph.shape[0])
 
     # Read triangles
-    tris1 = read_triangles('data/test/triangles_img_01.txt')
-    tris2 = read_triangles('data/test/triangles_img_02.txt')
+    # tris1 = read_triangles('data/test/triangles_img_01.txt')
+    # tris2 = read_triangles('data/test/triangles_img_02.txt')
     triangulation = DelaunayTriangulation()
     tris = triangulation.get_triangle_list(img_morph, points)
     triangulation.save_triangle_list(tris, rect, points, 'temp')
@@ -230,5 +230,8 @@ if __name__ == '__main__':
         morph_triangle(img1, img2, img_morph, t1, t2, t, alpha)
 
     # Display Result
-    cv2.imshow("Morphed Face", np.uint8(img_morph))
-    cv2.waitKey(0)
+    # cv2.imshow("Morphed Face", np.uint8(img_morph))
+    # cv2.waitKey(0)
+
+    # save image
+    cv2.imwrite('./data/test/morphed_' + filename_input + '_' + filename_data + '.jpg', np.uint8(img_morph))
