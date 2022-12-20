@@ -76,6 +76,8 @@ def morph_triangle(img1, img2, img, t1, t2, t, alpha, bulk=False):
     # Apply warpImage to small rectangular patches
     img1_rect = img1[r1[1]:r1[1] + r1[3], r1[0]:r1[0] + r1[2]]
     img2_rect = img2[r2[1]:r2[1] + r2[3], r2[0]:r2[0] + r2[2]]
+    # print(r1)
+    # print(img1_rect.shape, img2_rect.shape)
 
     size = (r[2], r[3])
     warp_img1 = apply_affine_transform(img1_rect, t1_rect, t_rect, size)
@@ -95,11 +97,13 @@ def bulk_morph(lower, upper, criteria, df):
     files = df[0].tolist()
     n_files = len(files) if len(files) > 0 else 1
     alpha = 1 / n_files
+    # print(alpha)
 
     points = read_points('data/morphed_data/points/' + filename_output + '.txt', oneline=False)
-    img1 = cv2.imread('./data/UTKFace/' + files[0] + '.jpg.chip.jpg')
+    img1 = cv2.imread('./data\\UTKFace\\' + files[0] + '.jpg.chip.jpg')
     temp_image = np.zeros(img1.shape, dtype = img1.dtype)
     img_morph = np.zeros(img1.shape, dtype = img1.dtype)
+    img_morph = np.float32(img_morph)
     rect = (0, 0, img_morph.shape[1], img_morph.shape[0])
 
     triangulation = DelaunayTriangulation()
@@ -113,21 +117,21 @@ def bulk_morph(lower, upper, criteria, df):
         file = df.iloc[i].values
         filename = file[0]
         temp = file[1:137].tolist()
-        points = []
+        points1 = []
         for j in range(0, len(temp), 2):
-            points.append((temp[j], temp[j+1]))
+            points1.append((temp[j], temp[j+1]))
 
-        img1 = cv2.imread('./data/UTKFace/' + filename + '.jpg.chip.jpg')
+        img1 = cv2.imread('./data\\UTKFace\\' + filename + '.jpg.chip.jpg')
 
         # Convert Mat to float data type
         img1 = np.float32(img1)
 
         # Read array of corresponding points
-        points1 = read_points('data/test/points_img_01.txt')[0]
 
         # Read triangles
         # tris1 = read_triangles('data/triangle_list/' + filename + '.txt')
         temp_image = img_morph.copy()
+
         for i in tris:
             x, y, z = i
 
@@ -135,20 +139,32 @@ def bulk_morph(lower, upper, criteria, df):
             y = int(y)
             z = int(z)
 
-            t1 = [points1[x], points1[y], points1[z]]
-            t = [points[x],  points[y],  points[z]]
+            t1 = [point_correction(points1[x], img_morph.shape),\
+                  point_correction(points1[y], img_morph.shape),
+                  point_correction(points1[z], img_morph.shape)]
+            t = [point_correction(points[x], img_morph.shape),\
+                 point_correction(points[y], img_morph.shape),
+                 point_correction(points[z], img_morph.shape)]
             t2 = t
 
             # Morph one triangle at a time.
             morph_triangle(img1, temp_image, img_morph, t1, t2, t, alpha, bulk=True)
-            cv2.imshow("Morphed Face", np.uint8(img_morph))
-        cv2.waitKey(1)
+        #     cv2.imshow("Morphed Face " + filename_output, np.uint8(img_morph))
+        # cv2.waitKey(10)
 
     # Display Result
     # cv2.imshow("Morphed Face", np.uint8(img_morph))
     # cv2.waitKey(0)
     # save image
     cv2.imwrite('./data/morphed_data/images/morphed_' + filename_output + '.jpg', np.uint8(img_morph))
+
+def point_correction(point, size):
+    x, y = point
+    x = 0 if x < 0 else x
+    y = 0 if y < 0 else y
+    x = size[0] - 1 if x >= size[0] else x
+    y = size[1] - 1 if y >= size[1] else y
+    return (x, y)
 
 def read_triangles(path):
     triangles = []

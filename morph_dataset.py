@@ -69,16 +69,16 @@ def get_weighted_points(lower, upper):
     lower = str(lower)
     upper = str(upper)
 
-    temp_m_0 = helper(lower, upper, '_0_0')
-    temp_m_1 = helper(lower, upper, '_0_1')
-    temp_m_2 = helper(lower, upper, '_0_2')
-    temp_m_3 = helper(lower, upper, '_0_3')
-    temp_m_4 = helper(lower, upper, '_0_4')
-    temp_f_0 = helper(lower, upper, '_1_0')
-    temp_f_1 = helper(lower, upper, '_1_1')
-    temp_f_2 = helper(lower, upper, '_1_2')
-    temp_f_3 = helper(lower, upper, '_1_3')
-    temp_f_4 = helper(lower, upper, '_1_4')
+    temp_m_0 = helper(lower, upper, '_0_0_')
+    temp_m_1 = helper(lower, upper, '_0_1_')
+    temp_m_2 = helper(lower, upper, '_0_2_')
+    temp_m_3 = helper(lower, upper, '_0_3_')
+    temp_m_4 = helper(lower, upper, '_0_4_')
+    temp_f_0 = helper(lower, upper, '_1_0_')
+    temp_f_1 = helper(lower, upper, '_1_1_')
+    temp_f_2 = helper(lower, upper, '_1_2_')
+    temp_f_3 = helper(lower, upper, '_1_3_')
+    temp_f_4 = helper(lower, upper, '_1_4_')
 
     return (temp_m_0, temp_m_1, temp_m_2, temp_m_3, temp_m_4, temp_f_0, temp_f_1, temp_f_2, temp_f_3, temp_f_4)
 
@@ -147,11 +147,11 @@ if __name__ == '__main__':
     data['gender'] = data[0].apply(lambda x: x.split('_')[1])
     data['race'] = data[0].apply(lambda x: x.split('_')[2])
 
-    # # get triangles lists
-    # print("Get triangle lists...")
-    # triangulation = DelaunayTriangulation()
-    # save_list(triangulation, data)
-    # print()
+    # get triangles lists
+    print("Get triangle lists...")
+    triangulation = DelaunayTriangulation()
+    save_list(triangulation, data)
+    print()
 
     # splitting data
     gender = {0: 'male', 1: 'female'}
@@ -171,32 +171,39 @@ if __name__ == '__main__':
     data = data.loc[data[0].isin(files[0])]
     # split data into groups
     data_0_1 = data.loc[(data['age'] < 2)].sort_values(by=['gender'])
-    data_2_3 = data.loc[(data['age'] >= 2) | (data['age'] <= 3)].sort_values(by=['gender'])
-    data_7_9 = data.loc[(data['age'] >= 7) | (data['age'] <= 9)].sort_values(by=['gender'])
-    data_13_15 = data.loc[(data['age'] >= 13) | (data['age'] <= 15)].sort_values(by=['gender'])
-    data_25_34 = data.loc[(data['age'] >= 25) | (data['age'] <= 34)].sort_values(by=['gender'])
-    data_35_46 = data.loc[(data['age'] >= 35) | (data['age'] <= 46)].sort_values(by=['gender'])
-    data_68_80 = data.loc[(data['age'] >= 68) | (data['age'] <= 116)].sort_values(by=['gender'])
+    data_2_3 = data.loc[(data['age'] >= 2) & (data['age'] < 3)].sort_values(by=['gender'])
+    data_7_9 = data.loc[(data['age'] >= 7) & (data['age'] <= 9)].sort_values(by=['gender'])
+    data_13_15 = data.loc[(data['age'] >= 13) & (data['age'] <= 15)].sort_values(by=['gender'])
+    data_25_34 = data.loc[(data['age'] >= 25) & (data['age'] <= 34)].sort_values(by=['gender'])
+    data_35_46 = data.loc[(data['age'] >= 35) & (data['age'] <= 46)].sort_values(by=['gender'])
+    data_68_80 = data.loc[(data['age'] >= 68) & (data['age'] <= 116)].sort_values(by=['gender'])
 
-    # # morphing data
-    # print("Get morphed points...")
-    # save_point(get_weighted_points(1, 1), 1, 1)
-    # save_point(get_weighted_points(2, 3), 2, 3)
-    # save_point(get_weighted_points(7, 9), 7, 9)
-    # save_point(get_weighted_points(13, 15), 13, 15)
-    # save_point(get_weighted_points(25, 34), 25, 34)
-    # save_point(get_weighted_points(35, 46), 35, 46)
-    # save_point(get_weighted_points(68, 80), 68, 80)
-    # print()
+    # morphing data
+    print("Get morphed points...")
+    save_point(get_weighted_points(1, 1), 1, 1)
+    save_point(get_weighted_points(2, 3), 2, 3)
+    save_point(get_weighted_points(7, 9), 7, 9)
+    save_point(get_weighted_points(13, 15), 13, 15)
+    save_point(get_weighted_points(25, 34), 25, 34)
+    save_point(get_weighted_points(35, 46), 35, 46)
+    save_point(get_weighted_points(68, 80), 68, 80)
+    print()
 
     def morph(df, lower, upper):
         for i in range(0, 5):
             data_m = df.loc[(df['gender'] == '0') & (df['race'] == str(i))]
             data_f = df.loc[(df['gender'] == '1') & (df['race'] == str(i))]
-            print(lower, upper, i)
-            print(data_m.shape)
-            morphing.bulk_morph(lower, upper, ('0_' + str(i)), data_m)
-            morphing.bulk_morph(lower, upper, ('1_' + str(i)), data_f)
+            # print(lower, upper, i)
+            # print(data_m.shape, data_f.shape)
+            # print(df)
+            try:
+                morphing.bulk_morph(lower, upper, ('0_' + str(i)), data_m)
+            except:
+                pass
+            try:
+                morphing.bulk_morph(lower, upper, ('1_' + str(i)), data_f)
+            except:
+                pass
 
     print("Morphing data...")
     morph(data_0_1, 1, 1)
